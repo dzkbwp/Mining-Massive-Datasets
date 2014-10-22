@@ -60,3 +60,57 @@ Integers are always represented by 4 bytes.
 
 When we hash pairs, they distribute among buckets randomly, but as evenly as possible; i.e., you may assume that each bucket gets exactly its fair share of the P pairs that occur once.
 Suppose there are S bytes of main memory. In order to run the PCY algorithm successfully, the number of buckets must be sufficiently large that most buckets are not large. In addition, on the second pass, there must be enough room to count all the candidate pairs. As a function of S, what is the largest value of P for which we can successfully run the PCY algorithm on this data? Demonstrate that you have the correct formula by indicating which of the following is a value for S and a value for P that is approximately (i.e., to within 10%) the largest possible value of P for that S.
+
+# Q1
+
+We will ignore the memory needed for frequent items since this s only 250k * 4 bytes = 1M bytes
+buckets 4 bytes per bucket
+S is main memory thus S/4 is the number of buckets
+
+there are 1M (one million) frequent buckets, if infrequent pair hashes into these it will have to be counted
+
+# main memory equals to number of stuff hashed into frequent basket plus bitmap size
+# 12 comes from the fact that 12 bytes needed per hash, since it is (item,item, count) 3 integers 4 bytes each
+# bitmap size is one bit per bucket. since there are s/4 buckets size will be s/4/8 bytes
+b = s/4
+
+s = [1M*p/b]*12 + b/8
+s = [1M * p * 4 / s]*12 + s/32
+s = [48M * p]/s + s/32
+31/32*s = 48M * p / s
+31/32*s^2 = 48M * p
+s^2 = 32/31*48M * p
+s^2 = 49548387 * p
+p = s^2 / 49548387
+
+minimem <- function(s, p) {
+    print(p - s^2/49548387)
+    p < s^2/49548387
+}
+
+minimem(1e+09, 3.5e+10)
+minimem(2e+08, 4e+08)
+minimem(5e+08, 5e+09) # closest
+minimem(5e+08, 3.2e+09)
+
+# Q2 Toivonen's algorithm
+
+During a run of Toivonen's Algorithm with set of items {A,B,C,D,E,F,G,H} a sample is found to have the following maximal frequent itemsets: {A,B}, {A,C}, {A,D}, {B,C}, {E}, {F}. Compute the negative border. Then, identify in the list below the set that is NOT in the negative border.'
+{B,D}
+{E,F}
+{G}
+{A,B,D}
+######
+{A,B,C,D,E,F,G,H}
+maximal frequent itemsets: {A,B}, {A,C}, {A,D}, {B,C}, {E}, {F} 
+-> Also frequent {A}, {B}, {C}, {D}
+
+Negative border: {A,B,C}, since all 2 item subsets of this set are frequent, but the set itself isn't.'
+Negative border also {E,F} since all 1 item subsets are frequent, but the set itself isn't.'
+same logic: {A,F}, {A,E}, {B,D}, {B,E}, {B,F}, {C,E}, {C,F}
+Also in the negative border {G} and {H}, since all their smaller subsets (empty set) are frequent, 
+but these sets themselves arent.
+
+-> Thus the anser is {A,B,D}
+
+
